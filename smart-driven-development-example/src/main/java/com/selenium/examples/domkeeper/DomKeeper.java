@@ -1,7 +1,10 @@
 package com.selenium.examples.domkeeper;
 
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
+import org.json.simple.parser.JSONParser;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -11,15 +14,19 @@ import com.gargoylesoftware.htmlunit.BrowserVersion;
 
 public class DomKeeper {
 	static WebDriver driver;
+	private String basePath;
 
 	// TODO Auto-generated method stub
 
 	By userName = By.xpath("//button");
 	WebElement user_name;
 	String baseURL = "http://localhost";
+	
 
-	public DomKeeper() {
+	public DomKeeper() throws URISyntaxException {
 		System.setProperty("webdriver.chrome.driver", "G:\\Jayakumar\\Selenium\\chromedriver.exe");
+		 URL resourceFolderURL = this.getClass().getClassLoader().getResource("images");
+	     basePath = resourceFolderURL.toURI().getPath() + "/";
 		driver = new HtmlUnitDriver(BrowserVersion.CHROME);
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 		driver.get(baseURL + "/net-banking/admin_login.php");
@@ -28,6 +35,8 @@ public class DomKeeper {
 
 	private void startTest() {
 		user_name = driver.findElement(userName);
+		JSONParser jparser = new JSONParser();
+		//Object obj = jparser.parse(in)   
 
 		Boolean isPresent = driver.findElements(userName).size() >= 0;
 		// System.out.println(isPresent+ user_name.getAttribute("name"));
@@ -62,7 +71,7 @@ public class DomKeeper {
 		return result;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws URISyntaxException {
 		DomKeeper dk = new DomKeeper();
 		dk.startTest();
 		dk.quit();

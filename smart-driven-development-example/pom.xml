@@ -11,12 +11,12 @@
 	<name>smart-driven-development-example</name>
 	<url>http://maven.apache.org</url>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
 	<dependencies>
-	<dependency>
+		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-swing-junit</artifactId>
 			<version>3.9.2</version>
@@ -52,14 +52,45 @@
 			<scope>test</scope>
 		</dependency>
 		
-
 		<dependency>
+    <groupId>com.googlecode.json-simple</groupId>
+    <artifactId>json-simple</artifactId>
+    <version>1.1.1</version>
+</dependency>
+
+
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<!-- <dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
-		
-	</dependencies>
-	
-</project>
+ --> 	</dependencies>
+ 	<build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.12</version>
+        <configuration>
+          <includes>
+            <include>**/*Examples.java</include>
+            <include>**/*Test.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+ 	
+ </project>
