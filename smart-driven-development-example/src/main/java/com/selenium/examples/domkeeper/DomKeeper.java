@@ -1,65 +1,86 @@
 package com.selenium.examples.domkeeper;
 
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import org.json.simple.parser.JSONParser;
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-
-import com.gargoylesoftware.htmlunit.BrowserVersion;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class DomKeeper {
 	static WebDriver driver;
-	private String basePath;
 
 	// TODO Auto-generated method stub
 
 	By userName = By.xpath("//button");
 	WebElement user_name;
-	String baseURL = "http://localhost";
-	
+	public static String configFilePath, url, multiObj, localObj ;
 
-	public DomKeeper() throws URISyntaxException {
-		System.setProperty("webdriver.chrome.driver", "G:\\Jayakumar\\Selenium\\chromedriver.exe");
-		 URL resourceFolderURL = this.getClass().getClassLoader().getResource("images");
-	     basePath = resourceFolderURL.toURI().getPath() + "/";
-		driver = new HtmlUnitDriver(BrowserVersion.CHROME);
+
+	public DomKeeper() throws FileNotFoundException, IOException { // Initial Setup
+		
+		
+		WebDriverManager.chromedriver().setup();
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("headless");
+		options.addArguments("window-size=1200x600");
+		driver = new ChromeDriver(options);
+		//driver = new HtmlUnitDriver(BrowserVersion.CHROME,true);
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-		driver.get(baseURL + "/net-banking/admin_login.php");
+		driver.get(url);
 		driver.manage().window().maximize();
 	}
 
-	private void startTest() {
-		user_name = driver.findElement(userName);
-		JSONParser jparser = new JSONParser();
-		//Object obj = jparser.parse(in)   
-
+	private void startTest(String url,String multiObj, String localObj) throws Exception { //Domkeeper - Finding element new/changed attribute value 
+		
+		user_name = highlight(By.xpath(multiObj));
+		
 		Boolean isPresent = driver.findElements(userName).size() >= 0;
-		// System.out.println(isPresent+ user_name.getAttribute("name"));
 
-		if (isPresent == true && isAttribtuePresent(user_name, "name")
-				&& user_name.getAttribute("name").equals("login")) {
-			System.out.println("\n Healthy - Element Exists");
-		} else if (isPresent && isAttribtuePresent(user_name, "name")
-				&& !user_name.getAttribute("name").equals("login")) {
+		if (isPresent == true && isAttribtuePresent(user_name, "name") && user_name.getAttribute("name").equals(propValue)) {
+			System.out.println("\n Healthy - Element is Exists");
+		} 
+		
+		else if (isPresent && isAttribtuePresent(user_name, "name") && !user_name.getAttribute("name").equals(propValue)) {
+			
+			takeSnapShot(driver,"D:\\"+ user_name.getTagName()+ ".png");
 			System.out.println("\n Fixed - Changed property element tag name is '" + user_name.getTagName()
 					+ "' and attribute value 'login' to '" + user_name.getAttribute("name") + "', Page URL :"
 					+ driver.getCurrentUrl());
-		} else {
+		} 
+		
+		else {
 			System.out.println("\n Critical - Element not present!!!");
 		}
 	}
 
-	private void quit() {
+	private Boolean getNameValue(WebElement element,String propValue) {
+		if(element.getAttribute("name").equals(propValue)) {return true;}
+		else {return false;}	
+	}	
+	
+	private Boolean getIdValue(WebElement element, String propValue) {
+		if(element.getAttribute("id").equals(propValue)) {return true;}
+		else {return false;}
+	}	
+	
+	private void quit() { // Close the all active window
 		driver.close();
 		driver.quit();
 	}
 
-	private static boolean isAttribtuePresent(WebElement element, String attribute) {
+	private boolean isAttribtuePresent(WebElement element, String attribute) { // To verify element is present or not																				// not
 		Boolean result = false;
 		try {
 			String value = element.getAttribute(attribute);
@@ -70,18 +91,35 @@ public class DomKeeper {
 		}
 		return result;
 	}
+	
+	public WebElement highlight(By by) {	// Draw a border around the found element
+		WebElement elem = driver.findElement(by);
+		if (driver instanceof JavascriptExecutor) {
+			((JavascriptExecutor) driver).executeScript("arguments[0].style.border='5px solid red'", elem);
+		}
+		return elem;
+	}
 
-	public static void main(String[] args) throws URISyntaxException {
+	public void takeSnapShot(WebDriver webdriver, String fileWithPath) throws Exception {	// Convert web driver object to TakeScreenshot
+		TakesScreenshot scrShot = ((TakesScreenshot) webdriver);
+		File SrcFile = scrShot.getScreenshotAs(OutputType.FILE);
+		File DestFile = new File(fileWithPath);
+		FileUtils.copyFile(SrcFile, DestFile);
+	}
+	
+	public static void main(String[] args) throws Exception {  // Main
+		configFilePath="D:\\Jayakumar\\Play-Groud\\eclipse-workspace\\smart-driven-development-example\\src\\main\\java\\com\\selenium\\examples\\domkeeper\\config.properties";
+		Properties properties = new Properties();
+		properties.load(new FileInputStream(configFilePath));
+		url = properties.getProperty("url");
+		multiObj = properties.getProperty("multiObj");
+		localObj = properties.getProperty("localObj");
 		DomKeeper dk = new DomKeeper();
-		dk.startTest();
+		dk.startTest(url,multiObj,localObj);
 		dk.quit();
 	}
 }
 
 
-// System.out.println("Id of the button is:- " + user_name.getAttribute("id"));
-// System.out.println("Link of the button is:- " +
-// user_name.getAttribute("href"));
-// System.out.println("Class of the button is:- " +
-// user_name.getAttribute("class"));
-// System.out.println("CSS Value :- "+ user_name.getCssValue("class"));
+
+
